@@ -33,13 +33,14 @@ import org.jgap.event.GeneticEvent;
 /**
  * Breeder for genetic algorithms. Runs the evolution process.
  * 
- * Introduces parallelism in the evolution process.
+ * Introduces parallelism in the evolution process. Requires a clone of the
+ * fitness function to full distribute computation.
  * 
  * @author Klaus Meffert
  * @author Julien Subercaze
  * @since 3.5
  */
-public class GABreederMulti extends BreederBase {
+public class GABreederSpawnOnce extends BreederBase {
 	/** String containing the CVS revision. Read out via reflection! */
 	private final static String CVS_REVISION = "$Revision: 1.21 $";
 
@@ -66,10 +67,16 @@ public class GABreederMulti extends BreederBase {
 	 * Default constructor, number of threads equals to: <br/>
 	 * <code>Runtime.getRuntime().availableProcessors();</code>
 	 */
-	public GABreederMulti() {
+	public GABreederSpawnOnce() {
 		super();
 		m_allChromosomesSoFar = new ArrayList<IChromosome>();
 		cores = Runtime.getRuntime().availableProcessors();
+		// Create the threads for fitness computation
+		for (int i = 0; i < cores; i++) {
+			final Thread t = new Thread(new FitnessThread());
+			t.setName("Fitness-" + i);
+			t.start();
+		}
 	}
 
 	/**
@@ -78,10 +85,15 @@ public class GABreederMulti extends BreederBase {
 	 * @param threads
 	 *            number of threads
 	 */
-	public GABreederMulti(final int threads) {
+	public GABreederSpawnOnce(final int threads) {
 		super();
 		m_allChromosomesSoFar = new ArrayList<IChromosome>();
 		cores = threads;
+		for (int i = 0; i < cores; i++) {
+			final Thread t = new Thread(new FitnessThread());
+			t.setName("Fitness-" + i);
+			t.start();
+		}
 	}
 
 	/**
@@ -334,7 +346,7 @@ public class GABreederMulti extends BreederBase {
 	 */
 	@Override
 	public Object clone() {
-		return new GABreederMulti();
+		return new GABreederSpawnOnce();
 	}
 
 	/**
@@ -381,12 +393,6 @@ public class GABreederMulti extends BreederBase {
 
 		if (!bulkFitFunc) {
 			// Multithread this part
-			// Create the threads for fitness computation
-			for (int i = 0; i < cores; i++) {
-				final Thread t = new Thread(new FitnessThread());
-				t.setName("Fitness-" + i);
-				t.start();
-			}
 			fitnessLatch = new CountDownLatch(currentPopSize);
 			for (int i = 0; i < currentPopSize; i++) {
 				final IChromosome chrom = a_pop.getChromosome(i);
@@ -402,14 +408,6 @@ public class GABreederMulti extends BreederBase {
 				fitnessLatch.await();
 			} catch (final InterruptedException e1) {
 				e1.printStackTrace();
-			}
-			// Kill the threads
-			for (int i = 0; i < cores; i++) {
-				try {
-					fitnessQueue.put(new PoisonChromo());
-				} catch (final InterruptedException e) {
-					e.printStackTrace();
-				}
 			}
 		}
 	}
@@ -703,7 +701,14 @@ public class GABreederMulti extends BreederBase {
 
 	@Override
 	public void finish() {
-		// TODO Auto-generated method stub
+		// Kill the threads
+		for (int i = 0; i < cores; i++) {
+			try {
+				fitnessQueue.put(new PoisonChromo());
+			} catch (final InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 
 	}
 }

@@ -19,52 +19,56 @@ import org.jgap.util.ICloneable;
  * @since 1.1
  */
 public class DefaultFitnessEvaluator
-    implements FitnessEvaluator, ICloneable, Comparable {
-  /** String containing the CVS revision. Read out via reflection!*/
-  private final static String CVS_REVISION = "$Revision: 1.13 $";
+implements FitnessEvaluator, ICloneable, Comparable {
+	/** String containing the CVS revision. Read out via reflection!*/
+	private final static String CVS_REVISION = "$Revision: 1.13 $";
 
-  /**
-   * Compares the first given fitness value with the second and returns true
-   * if the first one is greater than the second one. Otherwise returns false
-   * @param a_fitness_value1 first fitness value
-   * @param a_fitness_value2 second fitness value
-   * @return true: first fitness value greater than second
-   *
-   * @author Klaus Meffert
-   * @since 2.0 (until 1.1: input types int)
-   */
-  public boolean isFitter(final double a_fitness_value1,
-                          final double a_fitness_value2) {
-    return a_fitness_value1 > a_fitness_value2;
-  }
+	/**
+	 * Compares the first given fitness value with the second and returns true
+	 * if the first one is greater than the second one. Otherwise returns false
+	 * @param a_fitness_value1 first fitness value
+	 * @param a_fitness_value2 second fitness value
+	 * @return true: first fitness value greater than second
+	 *
+	 * @author Klaus Meffert
+	 * @since 2.0 (until 1.1: input types int)
+	 */
+	@Override
+	public boolean isFitter(final double a_fitness_value1,
+			final double a_fitness_value2) {
+		return a_fitness_value1 > a_fitness_value2;
+	}
 
-  public boolean isFitter(IChromosome a_chrom1, IChromosome a_chrom2) {
-    return isFitter(a_chrom1.getFitnessValue(), a_chrom2.getFitnessValue());
-  }
+	@Override
+	public boolean isFitter(final IChromosome a_chrom1, final IChromosome a_chrom2) {
+		return isFitter(a_chrom1.getFitnessValue(), a_chrom2.getFitnessValue());
+	}
 
-  /**
-   * @return deep clone of this instance
-   *
-   * @author Klaus Meffert
-   * @since 3.2
-   */
-  public Object clone() {
-    return new DefaultFitnessEvaluator();
-  }
+	/**
+	 * @return deep clone of this instance
+	 *
+	 * @author Klaus Meffert
+	 * @since 3.2
+	 */
+	@Override
+	public Object clone() {
+		return new DefaultFitnessEvaluator();
+	}
 
-  /**
-   * @param a_other sic
-   * @return as always
-   *
-   * @author Klaus Meffert
-   * @since 3.2
-   */
-  public int compareTo(Object a_other) {
-    if (a_other.getClass().equals(getClass())) {
-      return 0;
-    }
-    else {
-      return getClass().getName().compareTo(a_other.getClass().getName());
-    }
-  }
+	/**
+	 * @param a_other sic
+	 * @return as always
+	 *
+	 * @author Klaus Meffert
+	 * @since 3.2
+	 */
+	@Override
+	public int compareTo(final Object a_other) {
+		if (a_other.getClass().equals(getClass())) {
+			return 0;
+		}
+		else {
+			return getClass().getName().compareTo(a_other.getClass().getName());
+		}
+	}
 }

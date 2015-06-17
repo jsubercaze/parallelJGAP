@@ -22,35 +22,36 @@ import org.jgap.IChromosome;
  * @since 2.0
  */
 public class SalesmanFitnessFunction
-    extends FitnessFunction {
-  /** String containing the CVS revision. Read out via reflection!*/
-  private final static String CVS_REVISION = "$Revision: 1.10 $";
+extends FitnessFunction {
+	/** String containing the CVS revision. Read out via reflection!*/
+	private final static String CVS_REVISION = "$Revision: 1.10 $";
 
-  private final Salesman m_salesman;
+	private final Salesman m_salesman;
 
-  public SalesmanFitnessFunction(final Salesman a_salesman) {
-    m_salesman = a_salesman;
-  }
+	public SalesmanFitnessFunction(final Salesman a_salesman) {
+		m_salesman = a_salesman;
+	}
 
-  /**
-   * Computes the distance by calling salesman
-   * {@link org.jgap.impl.salesman.Salesman#distance(org.jgap.Gene, org.jgap.Gene) }
-   *
-   * @param a_subject chromosome representing cities
-   * @return distance of the journey thru the cities represented in the
-   * given chromosome
-   *
-   * @author Audrius Meskauskas
-   * @since 2.0
-   */
-  protected double evaluate(final IChromosome a_subject) {
-    double s = 0;
-    Gene[] genes = a_subject.getGenes();
-    for (int i = 0; i < genes.length - 1; i++) {
-      s += m_salesman.distance(genes[i], genes[i + 1]);
-    }
-    // add cost of coming back:
-    s += m_salesman.distance(genes[genes.length - 1], genes[0]);
-    return Integer.MAX_VALUE / 2 - s;
-  }
+	/**
+	 * Computes the distance by calling salesman
+	 * {@link org.jgap.impl.salesman.Salesman#distance(org.jgap.Gene, org.jgap.Gene) }
+	 *
+	 * @param a_subject chromosome representing cities
+	 * @return distance of the journey thru the cities represented in the
+	 * given chromosome
+	 *
+	 * @author Audrius Meskauskas
+	 * @since 2.0
+	 */
+	@Override
+	public double evaluate(final IChromosome a_subject) {
+		double s = 0;
+		final Gene[] genes = a_subject.getGenes();
+		for (int i = 0; i < genes.length - 1; i++) {
+			s += m_salesman.distance(genes[i], genes[i + 1]);
+		}
+		// add cost of coming back:
+		s += m_salesman.distance(genes[genes.length - 1], genes[0]);
+		return Integer.MAX_VALUE / 2 - s;
+	}
 }
